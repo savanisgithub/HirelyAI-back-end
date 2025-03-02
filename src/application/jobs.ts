@@ -1,48 +1,113 @@
-import { Request, Response } from "express";
-import job from "../infrastructure/jobs";
+import { NextFunction, Request, Response } from "express";
+import Job from "../infrastructure/schemas/job";
+import NotFoundError from "../domain/errors/not-found-error";
+import ValidationError from "../domain/errors/validation-error";
+import { z } from "zod";
 
+export const getAlljobs = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const job = await Job.find();
+    // throw new Error("");
+    return res.status(200).json(job);
+  } catch (error) {
+    next(error);
+  }
+};
 
-export const getAlljobs = (req:Request,res:Response) =>{
-    return res.json(job);
-}
+export const createJobs = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const jobs = z
+      .object({
+        title: z.string(),
+        description: z.string(),
+        type: z.string(),
+        location: z.string(),
+        questions: z.string().array().optional(),
+      })
+      .safeParse(req.body);
 
-export const createJobs = (req:Request,res:Response) =>{
-    const jobs = req.body;
-
-    if (!(typeof jobs.title === "string" && typeof jobs.id === "string" && typeof jobs.location === "string" && typeof jobs.type === "string")){
-        return res.status(400).send();
+    if (!jobs.success) {
+      throw new ValidationError(jobs.error.message);
     }
-    job.push(req.body);
+    await Job.create(jobs);
     return res.status(201).send();
-}
+  } catch (error) {
+    next(error);
+  }
+};
 
-export const getJobById = (req:Request,res:Response) =>{
-    const jobs = job.find(el => el.id === req.params.id);
-    if (!jobs){
-        return res.status(404).send();
+export const getJobById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const jobs = await Job.findById(req.params.id);
+    if (!jobs) {
+      throw new NotFoundError("Job Not Found");
     }
-    return res.json(jobs);
-}
+    return res.status(200).json(jobs);
+  } catch (error) {
+    next(error);
+  }
+};
 
-export const deleteJob = (req:Request,res:Response) =>{
-    const removeIndex = job.findIndex(el => el.id === req.params.id);
-    if (removeIndex == -1){
-        return res.status(404).json("Can't find the job").send();
+export const deleteJob = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const jobs = await Job.findByIdAndDelete(req.params.id);
+    if (!jobs) {
+      throw new NotFoundError("Job Not Found");
     }
-    job.splice(removeIndex, 1);
     return res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+};
 
-}
-
-export const updateJob = (req:Request,res:Response) =>{
-    const updateIndex = job.findIndex(el => el.id === req.params.id);
-    if (updateIndex == -1){
-        return res.status(404).send();
+export const updateJob = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const jobToUpdate = Job.findById(req.params.id);
+    if (!jobToUpdate) {
+      throw new NotFoundError("Job Not Found");
     }
-    job[updateIndex].title = req.body.title;
-    job[updateIndex].location = req.body.location;
-    job[updateIndex].type = req.body.type;
-    return res.status(201).send();
-}
 
-/// restful api 
+    const job = req.body;
+    if (
+      typeof job.title === "undefined" ||
+      typeof job.description === "undefined" ||
+      typeof job.location === "undefined" ||
+      typeof job.type === "undefined"
+    ) {
+      throw new ValidationError("");
+    }
+
+    await Job.findByIdAndUpdate(req.params.id, {
+      title: req.body.title,
+      location: req.body.location,
+      type: req.body.type,
+      description: req.body.description,
+      questions: req.body.questions,
+    });
+    return res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+};
+
+/// restful api
