@@ -6,10 +6,18 @@ import {
   getJobById,
   updateJob,
 } from "../application/jobs";
+import { ClerkExpressRequireAuth } from "@clerk/clerk-sdk-node";
 
 const jobsRouter = express.Router();
 
-jobsRouter.route("/").get(getAlljobs).post(createJobs);
-jobsRouter.route("/:id").get(getJobById).delete(deleteJob).put(updateJob);
+jobsRouter
+  .route("/")
+  .get(getAlljobs)
+  .post(ClerkExpressRequireAuth({}), createJobs);
+jobsRouter
+  .route("/:id")
+  .get(ClerkExpressRequireAuth({}), getJobById)
+  .delete(deleteJob)
+  .put(updateJob);
 
 export default jobsRouter;
