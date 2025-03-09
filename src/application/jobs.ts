@@ -24,7 +24,7 @@ export const createJobs = async (
   next: NextFunction
 ) => {
   try {
-    const jobs = z
+    const job = z
       .object({
         title: z.string(),
         description: z.string(),
@@ -33,11 +33,11 @@ export const createJobs = async (
         questions: z.string().array().optional(),
       })
       .safeParse(req.body);
-
-    if (!jobs.success) {
-      throw new ValidationError(jobs.error.message);
+    if (!job.success) {
+      throw new ValidationError(job.error.message);
     }
-    await Job.create(jobs);
+
+    await Job.create(job.data);
     return res.status(201).send();
   } catch (error) {
     next(error);

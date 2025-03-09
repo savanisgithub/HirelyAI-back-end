@@ -7,13 +7,14 @@ import {
   updateJob,
 } from "../application/jobs";
 import { ClerkExpressRequireAuth } from "@clerk/clerk-sdk-node";
+import AuthorizationMiddleware from "./middleware/authorization-middleware";
 
 const jobsRouter = express.Router();
 
 jobsRouter
   .route("/")
   .get(getAlljobs)
-  .post(ClerkExpressRequireAuth({}), createJobs);
+  .post(ClerkExpressRequireAuth({}), AuthorizationMiddleware, createJobs);
 jobsRouter
   .route("/:id")
   .get(ClerkExpressRequireAuth({}), getJobById)

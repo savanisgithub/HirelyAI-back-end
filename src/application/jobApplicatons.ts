@@ -9,15 +9,12 @@ export const getJobApplications = async (
 ) => {
   try {
     const { jobId } = req.query;
-    if (!jobId) {
-      const jobApplications = await jobApplication
-        .find()
-        .populate("job")
-        .exec();
+    if (jobId) {
+      const jobApplications = await jobApplication.find({ job: jobId });
       return res.status(200).json(jobApplications);
     }
 
-    const jobApplications = await jobApplication.find({ job: jobId });
+    const jobApplications = await jobApplication.find().populate("job").exec();
     return res.status(200).json(jobApplications);
   } catch (error) {
     next(error);
@@ -31,7 +28,9 @@ export const createJobApplications = async (
 ) => {
   try {
     const jobApplications = req.body;
-    await jobApplication.create(jobApplications);
+    console.log(jobApplications);
+
+    const createdJobApplication = await jobApplication.create(jobApplications);
     return res.status(201).send();
   } catch (error) {
     next(error);
