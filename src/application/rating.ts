@@ -18,7 +18,7 @@ export async function generateRating(JobApplicationId: string) {
 
   const strResponse = completion.choices[0].message.content;
   console.log(strResponse);
-  const response = JSON.parse(strResponse);
+  const response = JSON.parse(strResponse as string);
   console.log(response);
   if (!response.rate) {
     return "no response";

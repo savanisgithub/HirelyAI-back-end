@@ -33,7 +33,7 @@ export const createJobApplications = async (
 
     const createdJobApplication = await jobApplication.create(jobApplications);
     //call the method that updates the current job application with the rating
-    generateRating(createdJobApplication._id);
+    generateRating(createdJobApplication._id.toString());
     return res.status(201).send();
   } catch (error) {
     next(error);
