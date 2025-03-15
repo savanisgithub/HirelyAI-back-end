@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import jobApplication from "../infrastructure/schemas/jobApplication";
 import NotFoundError from "../domain/errors/not-found-error";
+import { generateRating } from "./rating";
 
 export const getJobApplications = async (
   req: Request,
@@ -31,6 +32,8 @@ export const createJobApplications = async (
     console.log(jobApplications);
 
     const createdJobApplication = await jobApplication.create(jobApplications);
+    //call the method that updates the current job application with the rating
+    generateRating(createdJobApplication._id);
     return res.status(201).send();
   } catch (error) {
     next(error);
