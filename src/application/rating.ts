@@ -20,10 +20,14 @@ export async function generateRating(JobApplicationId: Types.ObjectId) {
 
   const strResponse = completion.choices[0].message.content;
   console.log(strResponse);
-  const response = JSON.parse(strResponse as string);
+  if (!strResponse) {
+    return;
+  }
+
+  const response = JSON.parse(strResponse);
   console.log(response);
   if (!response.rate) {
-    return "no response";
+    return;
   }
   await jobApplication.findOneAndUpdate(
     { _id: JobApplicationId },

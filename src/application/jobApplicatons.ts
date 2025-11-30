@@ -18,7 +18,8 @@ export const getJobApplications = async (
     const jobApplications = await jobApplication.find().populate("job").exec();
     return res.status(200).json(jobApplications);
   } catch (error) {
-    next(error);
+    console.log(error);
+    return res.status(500).send();
   }
 };
 
@@ -36,25 +37,25 @@ export const createJobApplications = async (
     generateRating(createdJobApplication._id);
     return res.status(201).send();
   } catch (error) {
-    next(error);
+    console.log(error);
+    return res.status(500).send();
   }
 };
 
 export const getJobApplicationById = async (
   req: Request,
   res: Response,
-  next: NextFunction
 ) => {
   try {
     const jobApplications = await jobApplication.findById(req.params.id);
 
-    if (!jobApplications) {
-      throw new NotFoundError("Job Application not found");
+    if (jobApplications === null) {
+      return res.status(404).send();
     }
 
     return res.status(200).json(jobApplications);
   } catch (error) {
-    console.error("Error fetching job application:", error);
-    next(error);
+    console.log(error);
+    return res.status(500).send();
   }
 };
